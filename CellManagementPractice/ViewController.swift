@@ -29,10 +29,8 @@ final class ViewController: UIViewController {
         case application
         var items: [Item] {
             switch self {
-            case .setting:
-                return SettingItem.allCases.map { $0.item }
-            case .application:
-                return ApplicationItem.allCases.map { $0.item }
+            case .setting: return SettingItem.allCases.map { $0.item }
+            case .application: return ApplicationItem.allCases.map { $0.item }
             }
         }
     }
@@ -41,10 +39,8 @@ final class ViewController: UIViewController {
         case notification
         var item: Item {
             switch self {
-            case .color:
-                return .setting(SettingCellData(title: "テーマカラー"))
-            case .notification:
-                return .switching(SwitchCellData(title: "通知", isOn: true))
+            case .color: return .setting(SettingCellData(title: "テーマカラー"))
+            case .notification: return .switching(SwitchCellData(title: "通知", isOn: true))
             }
         }
     }
@@ -54,31 +50,54 @@ final class ViewController: UIViewController {
         case evaluate
         var item: Item {
             switch self {
-            case .share:
-                return .setting(SettingCellData(title: "このアプリをシェアする"))
-            case .operation:
-                return .setting(SettingCellData(title: "操作方法"))
-            case .evaluate:
-                return .setting(SettingCellData(title: "評価する"))
+            case .share: return .setting(SettingCellData(title: "このアプリをシェアする"))
+            case .operation: return .setting(SettingCellData(title: "操作方法"))
+            case .evaluate: return .setting(SettingCellData(title: "評価する"))
             }
         }
     }
-
+    
     @IBOutlet private weak var collectionView: UICollectionView!
     
     private var dataSource: UICollectionViewDiffableDataSource<Secion, Item>! = nil
-    private var cells: [SettingCellData] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureHierarchy()
         configureDataSource()
-        print(#function)
+    }
+    
+    private func showActivityVC() {
+        guard let shareUrl = URL(string: "https://apps.apple.com/jp/app/movie-reviews-%E6%98%A0%E7%94%BB%E3%83%AC%E3%83%93%E3%83%A5%E3%83%BC%E7%AE%A1%E7%90%86/id1578614989")
+        else { return }
+        let activityVC = UIActivityViewController(activityItems: [shareUrl],
+                                                  applicationActivities: nil)
+        present(activityVC, animated: true, completion: nil)
     }
 
 }
 
 extension ViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        didSelectItemAt indexPath: IndexPath) {
+        let section = Secion.allCases[indexPath.section]
+        switch section {
+        case .setting:
+            let settingItem = SettingItem.allCases[indexPath.item]
+            switch settingItem {
+            case .color: print(settingItem)
+            case .notification: print(settingItem)
+            }
+        case .application:
+            let applicationItem = ApplicationItem.allCases[indexPath.item]
+            switch applicationItem {
+            case .share: showActivityVC()
+            case .operation: print(applicationItem)
+            case .evaluate: print(applicationItem)
+            }
+        }
+    }
     
 }
 
@@ -87,7 +106,7 @@ extension ViewController {
         let config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         return UICollectionViewCompositionalLayout.list(using: config)
     }
-
+    
     private func configureHierarchy() {
         collectionView.collectionViewLayout = createListLayout()
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -117,7 +136,7 @@ extension ViewController {
         }
         dataSource.apply(snapshot, animatingDifferences: true)
     }
-
+    
 }
 
 // SwitchCellDataなどにhashable適合せず、Itemに対して適合させる時
